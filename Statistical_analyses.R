@@ -47,6 +47,33 @@ summary(postRT)
 with(dataRT, aggregate(RT, list(dataRT2$Condition), mean))
 with(dataRT, aggregate(RT, list(dataRT2$Condition), sd))
 
+## ---
+## ACCURACY ANALYSES
+##
+
+dataacc = read.table(paste(inpath, "/err_det.txt"), sep = "", header=TRUE)
+dataacc$n = as.factor(dataacc$n)
+dataacc$condition = as.factor(dataacc$condition)
+
+modacc = lme(log(acc)~condition, random=~1|n, data=dataacc)
+anova(modacc)
+
+residus<-residuals(modacc)
+qqnorm(residus)
+qqline(residus)
+
+plot(fitted(modacc), residuals(modacc),
+     xlab = "Fitted Values", ylab = "Residuals")
+abline(h=0, lty=2)
+lines(smooth.spline(fitted(modacc), residuals(modacc)))
+
+r.squaredGLMM(modacc)
+
+postacc = glht(modacc,linfct=mcp(condition="Tukey"))
+summary(postacc)
+
+with(dataacc, aggregate(acc, list(dataacc$condition), mean))
+with(dataacc, aggregate(acc, list(dataacc$condition), sd))
 
 ## ---
 ## IKI ANALYSES
